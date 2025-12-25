@@ -1,4 +1,4 @@
-export const tenantGuard = (req, res, next) => {
+const tenantGuard = (req, res, next) => {
   if (!req.user || !req.user.tenantId) {
     return res.status(403).json({ message: "Tenant access denied" });
   }
@@ -6,3 +6,6 @@ export const tenantGuard = (req, res, next) => {
   req.tenantId = req.user.tenantId;
   next();
 };
+
+// EXPORT with the same name used in routes
+export { tenantGuard };
