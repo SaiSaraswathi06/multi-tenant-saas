@@ -1,28 +1,42 @@
 services:
   database:
     image: postgres:15
-    container_name: saas_database
+    restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: saas_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: saasdb
     ports:
       - "5432:5432"
     volumes:
-      - ./backend/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
-      - ./backend/seed/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql
+      - db_data:/var/lib/postgresql/data"
 
   backend:
     build: ./backend
-    container_name: saas_backend
-    environment:
-      PORT: 5000
-      DB_HOST: database
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: saas_db
-      JWT_SECRET: supersecretkey
-    ports:
-      - "5000:5000"
+    restart: always
     depends_on:
       - database
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: saasdb
+      JWT_SECRET: mystrongsecret
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  db_data:
